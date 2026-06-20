@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Neeraj — Sprint Mode</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root {
   --accent: #00e676;
   --accent-dim: #00994f;
@@ -21,6 +21,12 @@
   --faint: #0d0d0d;
   --recharge: #38bdf8;
   --recharge-bg: rgba(56,189,248,0.06);
+  --nav-h: 56px;
+  --bottom-nav-h: 60px;
+}
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
 }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -32,7 +38,42 @@ body {
   align-items: center;
 }
 
-/* NAV */
+/* ── LOCK SCREEN ── */
+#lockScreen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 24px;
+}
+#lockScreen.hidden { display: none; }
+.lock-brand { text-align: center; margin-bottom: 40px; }
+.lock-brand-name { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text); }
+.lock-brand-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+.lock-title { font-size: 22px; font-weight: 300; color: var(--text); margin-bottom: 8px; text-align: center; }
+.lock-sub { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 36px; }
+.pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 36px; }
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--border2); background: transparent;
+  transition: all 0.2s;
+}
+.pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+.pin-dot.error { background: #ff4444; border-color: #ff4444; }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 72px); gap: 12px; }
+.pin-key {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text); font-size: 22px; font-weight: 300;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; user-select: none;
+}
+.pin-key:active { background: var(--surface2); transform: scale(0.94); }
+.pin-key.del { font-size: 18px; color: var(--muted); }
+.pin-key.empty { background: transparent; border: none; cursor: default; }
+.lock-msg { font-size: 12px; color: #ff4444; text-align: center; margin-top: 16px; min-height: 18px; }
+
+/* ── NAV (desktop top bar) ── */
 .nav {
   width: 100%;
   max-width: 700px;
@@ -53,9 +94,47 @@ body {
 .nav-tab.active { color: var(--text); border-color: var(--border2); background: var(--surface); }
 .nav-tab:hover:not(.active) { color: var(--text); }
 
-/* VIEWS */
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--bottom-nav-h);
+  background: #0e0e0e;
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav-inner {
+  display: flex; height: 100%;
+}
+.bottom-nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px; background: none; border: none;
+  color: var(--muted); cursor: pointer; padding: 0; transition: color 0.15s;
+  font-family: inherit;
+}
+.bottom-nav-btn.active { color: var(--accent); }
+.bottom-nav-icon { font-size: 18px; line-height: 1; }
+.bottom-nav-label { font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
+
+/* ── VIEWS ── */
 .view { display: none; width: 100%; max-width: 700px; padding: 28px 24px 40px; }
 .view.active { display: block; }
+
+/* ── QUOTE CARD ── */
+.quote-card {
+  width: calc(100% - 48px); max-width: 700px;
+  margin: 12px 0 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+}
+.quote-card:hover { background: var(--surface2); }
+.quote-card .q-text { font-size: 13px; color: var(--text); line-height: 1.65; font-style: italic; transition: opacity 0.3s; }
+.quote-card .q-author { font-size: 11px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; font-style: normal; font-weight: 500; }
+.quote-card .q-hint { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
 /* ── TIMER VIEW ── */
 .mode-tabs {
@@ -64,8 +143,8 @@ body {
   overflow: hidden; margin-bottom: 20px;
 }
 .mode-tab {
-  flex: 1; padding: 8px 10px; font-size: 11px; font-weight: 500;
-  letter-spacing: 0.05em; color: var(--muted); background: transparent;
+  flex: 1; padding: 8px 6px; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.04em; color: var(--muted); background: transparent;
   border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap;
 }
 .mode-tab.active { background: var(--surface2); color: var(--text); border-bottom: 2px solid var(--accent); }
@@ -75,7 +154,7 @@ body {
 .field-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; font-weight: 500; }
 .task-input {
   width: 100%; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--text);
+  border-radius: 8px; padding: 12px 14px; font-size: 15px; color: var(--text);
   outline: none; font-family: inherit; transition: border-color 0.15s;
 }
 .task-input::placeholder { color: var(--muted); }
@@ -91,17 +170,17 @@ body {
 .timer-time { font-size: 38px; font-weight: 300; letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
 .timer-phase { font-size: 9px; color: var(--muted); margin-top: 6px; letter-spacing: 0.18em; text-transform: uppercase; }
 
-.timer-right { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+.timer-right { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .controls { display: flex; align-items: center; gap: 10px; }
 .btn { border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.15s, transform 0.1s; font-family: inherit; }
 .btn:active { transform: scale(0.93); }
-.btn-main { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); color: #0a0a09; font-size: 16px; font-weight: 700; }
+.btn-main { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #0a0a09; font-size: 18px; font-weight: 700; }
 .btn-main:hover { opacity: 0.85; }
-.btn-secondary { width: 34px; height: 34px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+.btn-secondary { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 15px; }
 .btn-secondary:hover { color: var(--text); }
 
 .slider-group { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
-.slider-group input[type=range] { flex: 1; accent-color: var(--accent); }
+.slider-group input[type=range] { flex: 1; accent-color: var(--accent); min-width: 0; }
 .slider-val { color: var(--text); min-width: 28px; font-size: 12px; }
 
 .streak { display: flex; gap: 5px; align-items: center; }
@@ -111,31 +190,12 @@ body {
 
 .quote { font-size: 12px; color: #888888; font-style: italic; line-height: 1.6; }
 
-.quote-card {
-  width: 100%; margin-bottom: 20px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 10px 10px 0; padding: 14px 18px;
-  display: flex; flex-direction: column; gap: 6px;
-  cursor: pointer; transition: border-color 0.2s, background 0.2s;
-}
-.quote-card:hover { background: var(--surface2); }
-.quote-card .q-text {
-  font-size: 13px; color: var(--text); line-height: 1.65;
-  font-style: italic; transition: opacity 0.3s;
-}
-.quote-card .q-author {
-  font-size: 11px; color: var(--accent); letter-spacing: 0.08em;
-  text-transform: uppercase; font-style: normal; font-weight: 500;
-}
-.quote-card .q-hint { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
 /* session notepad */
 .notepad-wrap { margin-top: 20px; }
 .notepad {
-  width: 100%; min-height: 100px; background: var(--surface);
+  width: 100%; min-height: 90px; background: var(--surface);
   border: 1px solid var(--border); border-radius: 8px;
-  padding: 12px 14px; font-size: 13px; color: var(--text);
+  padding: 12px 14px; font-size: 14px; color: var(--text);
   outline: none; font-family: inherit; resize: vertical;
   line-height: 1.6; transition: border-color 0.15s;
 }
@@ -146,37 +206,38 @@ body {
 .task-check-row { display: flex; gap: 8px; align-items: center; }
 .task-check-input {
   flex: 1; background: transparent; border: none;
-  border-bottom: 1px solid var(--border); padding: 5px 0;
-  font-size: 12px; color: var(--text); outline: none; font-family: inherit;
+  border-bottom: 1px solid var(--border); padding: 8px 0;
+  font-size: 14px; color: var(--text); outline: none; font-family: inherit;
 }
 .task-check-input::placeholder { color: var(--muted); }
 .task-check-input.done { text-decoration: line-through; color: var(--muted); }
 .check-btn {
-  width: 18px; height: 18px; border-radius: 4px;
+  width: 22px; height: 22px; border-radius: 5px;
   border: 1px solid var(--border); background: transparent;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: all 0.15s; color: transparent; font-size: 10px;
+  flex-shrink: 0; transition: all 0.15s; color: transparent; font-size: 11px;
 }
 .check-btn.done { background: var(--accent); border-color: var(--accent); color: #0a0a09; }
 .add-task-btn {
-  font-size: 11px; color: var(--muted); background: none; border: none;
-  cursor: pointer; padding: 4px 0; text-align: left; display: flex; align-items: center; gap: 5px;
+  font-size: 13px; color: var(--muted); background: none; border: none;
+  cursor: pointer; padding: 6px 0; text-align: left; display: flex; align-items: center; gap: 5px;
   margin-top: 4px;
 }
 .add-task-btn:hover { color: var(--text); }
 
 .finish-sprint-btn {
-  margin-top: 14px; width: 100%; padding: 11px;
+  margin-top: 14px; width: 100%; padding: 14px;
   background: var(--accent); border: none;
-  border-radius: 8px; color: #000000; font-size: 13px; font-weight: 600;
+  border-radius: 10px; color: #000000; font-size: 15px; font-weight: 600;
   letter-spacing: 0.04em; cursor: pointer; transition: all 0.15s; font-family: inherit;
 }
 .finish-sprint-btn:hover { opacity: 0.85; }
+.finish-sprint-btn:active { transform: scale(0.98); }
 
 /* ── LOG VIEW ── */
 .log-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .filter-btn {
-  padding: 5px 12px; font-size: 11px; border-radius: 6px;
+  padding: 7px 14px; font-size: 12px; border-radius: 20px;
   border: 1px solid var(--border); background: transparent;
   color: var(--muted); cursor: pointer; transition: all 0.15s; font-family: inherit;
 }
@@ -187,35 +248,25 @@ body {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; overflow: hidden; cursor: pointer;
 }
-.log-card-header {
-  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-}
+.log-card-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
 .log-mode-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--accent); }
 .log-mode-dot.recharge { background: #38bdf8; }
-.log-card-title { font-size: 14px; color: var(--text); font-weight: 500; flex: 1; }
-.log-card-meta { font-size: 11px; color: var(--muted); display: flex; gap: 12px; align-items: center; }
-.log-card-body {
-  display: none; padding: 0 16px 14px; border-top: 1px solid var(--border);
-}
+.log-card-title { font-size: 14px; color: var(--text); font-weight: 500; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-card-meta { font-size: 11px; color: var(--muted); display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.log-card-body { display: none; padding: 0 16px 14px; border-top: 1px solid var(--border); }
 .log-card.open .log-card-body { display: block; }
-.log-card-body .notepad-ro {
-  font-size: 12px; color: var(--muted); line-height: 1.7;
-  margin-top: 10px; white-space: pre-wrap;
-}
+.log-card-body .notepad-ro { font-size: 12px; color: var(--muted); line-height: 1.7; margin-top: 10px; white-space: pre-wrap; }
 .log-tasks-list { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
-.log-task-item { font-size: 12px; display: flex; gap: 8px; align-items: flex-start; }
+.log-task-item { font-size: 13px; display: flex; gap: 8px; align-items: flex-start; }
 .log-task-item .bullet { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
 .log-task-item.done-task { color: var(--muted); text-decoration: line-through; }
-.log-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 40px 0; }
+.log-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 48px 0; }
 .log-chevron { color: var(--muted); font-size: 11px; transition: transform 0.2s; }
 .log-card.open .log-chevron { transform: rotate(90deg); }
 
 /* ── STATS VIEW ── */
 .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
-.stat-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 16px;
-}
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
 .stat-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
 .stat-val { font-size: 32px; font-weight: 300; color: var(--text); }
 .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -225,94 +276,195 @@ body {
 .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
 .chart-wrap canvas { width: 100% !important; }
 
-.mode-breakdown { display: flex; flex-direction: column; gap: 8px; }
+.mode-breakdown { display: flex; flex-direction: column; gap: 10px; }
 .mode-bar-row { display: flex; align-items: center; gap: 12px; font-size: 12px; }
 .mode-bar-label { width: 110px; color: var(--muted); flex-shrink: 0; }
 .mode-bar-track { flex: 1; height: 6px; background: var(--faint); border-radius: 3px; overflow: hidden; }
 .mode-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.5s; }
-.mode-bar-fill.green { background: #38bdf8; }
+.mode-bar-fill.blue { background: #38bdf8; }
 .mode-bar-count { color: var(--text); min-width: 20px; text-align: right; }
 
 /* ── PLANNER ── */
 .planner-section { margin-bottom: 28px; }
-.planner-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px;
-}
+.planner-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .planner-title { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
 .planner-meta { font-size: 11px; color: var(--muted); }
-.planner-progress {
-  height: 3px; background: var(--faint); border-radius: 2px; margin-bottom: 14px; overflow: hidden;
-}
+.planner-progress { height: 3px; background: var(--faint); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
 .planner-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
 
 .weekly-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; background: var(--surface); border: 1px solid var(--border);
+  padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; margin-bottom: 6px; transition: opacity 0.2s;
 }
 .weekly-item.done-item { opacity: 0.5; }
 .weekly-check {
-  width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--border2);
+  width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border2);
   background: transparent; cursor: pointer; display: flex; align-items: center;
-  justify-content: center; flex-shrink: 0; transition: all 0.15s; color: transparent; font-size: 11px;
+  justify-content: center; flex-shrink: 0; transition: all 0.15s; color: transparent; font-size: 12px;
+  min-width: 22px;
 }
 .weekly-check.done { background: var(--accent); border-color: var(--accent); color: #000; }
-.weekly-item-text { flex: 1; font-size: 13px; color: var(--text); }
+.weekly-item-text { flex: 1; font-size: 14px; color: var(--text); }
 .weekly-item-text.done { text-decoration: line-through; color: var(--muted); }
-.weekly-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 0 2px; opacity: 0; transition: opacity 0.15s; }
+.weekly-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; padding: 0 4px; opacity: 0; transition: opacity 0.15s; line-height: 1; }
 .weekly-item:hover .weekly-item-del { opacity: 1; }
 
-.add-weekly-row {
-  display: flex; gap: 8px; margin-top: 10px;
-}
+.add-weekly-row { display: flex; gap: 8px; margin-top: 10px; }
 .add-weekly-input {
   flex: 1; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--text);
+  border-radius: 8px; padding: 11px 12px; font-size: 14px; color: var(--text);
   outline: none; font-family: inherit; transition: border-color 0.15s;
 }
 .add-weekly-input::placeholder { color: var(--muted); }
 .add-weekly-input:focus { border-color: var(--accent-dim); }
 .add-weekly-btn {
-  padding: 9px 16px; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer;
+  padding: 11px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 14px; cursor: pointer;
   font-family: inherit; transition: all 0.15s; white-space: nowrap;
 }
 .add-weekly-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
 
 .gcal-connect {
-  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
   margin-bottom: 20px;
 }
-.gcal-icon { font-size: 18px; flex-shrink: 0; }
-.gcal-info { flex: 1; }
-.gcal-info .gcal-title { font-size: 13px; color: var(--text); font-weight: 500; }
-.gcal-info .gcal-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.gcal-icon { font-size: 20px; flex-shrink: 0; }
+.gcal-info { flex: 1; min-width: 0; }
+.gcal-info .gcal-title { font-size: 14px; color: var(--text); font-weight: 500; }
+.gcal-info .gcal-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .gcal-btn {
-  padding: 7px 14px; font-size: 12px; font-weight: 500; border-radius: 6px;
+  padding: 8px 16px; font-size: 13px; font-weight: 500; border-radius: 6px;
   border: 1px solid var(--border2); background: transparent; color: var(--text);
   cursor: pointer; font-family: inherit; white-space: nowrap; transition: all 0.15s;
+  flex-shrink: 0;
 }
 .gcal-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
 .gcal-btn.connected { border-color: var(--accent); color: var(--accent); cursor: default; }
 
 .today-task-item {
   display: flex; align-items: flex-start; gap: 10px;
-  padding: 8px 14px; border-bottom: 1px solid var(--faint); font-size: 13px;
+  padding: 10px 14px; border-bottom: 1px solid var(--faint); font-size: 14px;
 }
-.today-task-bullet { color: var(--accent); margin-top: 1px; flex-shrink: 0; font-size: 11px; }
+.today-task-bullet { color: var(--accent); margin-top: 2px; flex-shrink: 0; font-size: 12px; }
 .today-task-bullet.pending { color: var(--muted); }
 .today-task-label { flex: 1; color: var(--text); }
 .today-task-label.pending { color: var(--muted); text-decoration: line-through; }
-.today-task-session { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.today-task-session { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; padding-left: 8px; }
 .today-empty { font-size: 13px; color: var(--muted); padding: 20px 14px; }
-
 .week-reset-note { font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; }
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .nav { display: none; }
+  .bottom-nav { display: block; }
+
+  .quote-card {
+    width: calc(100% - 32px);
+    margin: 10px 0 0;
+  }
+
+  .view {
+    padding: 16px 16px calc(var(--bottom-nav-h) + 24px + env(safe-area-inset-bottom));
+  }
+
+  /* timer stacks vertically on mobile */
+  .timer-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .timer-ring { width: 200px; height: 200px; }
+  .timer-ring svg { width: 200px; height: 200px; }
+  .timer-time { font-size: 44px; }
+
+  .timer-right { width: 100%; align-items: center; }
+  .controls { justify-content: center; }
+  .slider-group { width: 100%; }
+
+  .streak { justify-content: center; }
+  .quote { text-align: center; }
+
+  /* mode tabs scroll on very small screens */
+  .mode-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .mode-tab { flex-shrink: 0; }
+
+  /* stats grid 2 cols */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid .stat-card:last-child { grid-column: 1 / -1; }
+
+  .mode-bar-label { width: 80px; }
+
+  /* log card meta compact */
+  .log-card-meta .log-date { display: none; }
+
+  /* planner del always visible on touch */
+  .weekly-item-del { opacity: 0.4 !important; }
+
+  .pin-pad { grid-template-columns: repeat(3, 80px); gap: 14px; }
+  .pin-key { width: 80px; height: 80px; }
+}
+
+/* Mobile top brand bar */
+.mobile-top-bar {
+  display: none;
+  width: 100%; padding: 14px 16px 8px;
+  align-items: center; justify-content: space-between;
+}
+.mobile-top-brand { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text); }
+.mobile-top-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
+.mobile-lock-btn {
+  background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px;
+}
+@media (max-width: 600px) {
+  .mobile-top-bar { display: flex; }
+}
 </style>
 </head>
 <body>
 
+<!-- ── LOCK SCREEN ── -->
+<div id="lockScreen">
+  <div class="lock-brand">
+    <div class="lock-brand-name">Neeraj Vaid</div>
+    <div class="lock-brand-sub">Soccial Symphony · Sprint Mode</div>
+  </div>
+  <div class="lock-title" id="lockTitle">Enter PIN</div>
+  <div class="lock-sub" id="lockSub">Your data is private</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" data-k="1">1</button>
+    <button class="pin-key" data-k="2">2</button>
+    <button class="pin-key" data-k="3">3</button>
+    <button class="pin-key" data-k="4">4</button>
+    <button class="pin-key" data-k="5">5</button>
+    <button class="pin-key" data-k="6">6</button>
+    <button class="pin-key" data-k="7">7</button>
+    <button class="pin-key" data-k="8">8</button>
+    <button class="pin-key" data-k="9">9</button>
+    <button class="pin-key empty"></button>
+    <button class="pin-key" data-k="0">0</button>
+    <button class="pin-key del" id="pinDelBtn">⌫</button>
+  </div>
+  <div class="lock-msg" id="lockMsg"></div>
+</div>
+
+<!-- ── MOBILE TOP BAR ── -->
+<div class="mobile-top-bar">
+  <div>
+    <div class="mobile-top-brand">Neeraj Vaid</div>
+    <div class="mobile-top-sub">Soccial Symphony · Sprint Mode</div>
+  </div>
+  <button class="mobile-lock-btn" id="mobileLockBtn" title="Lock">🔒</button>
+</div>
+
+<!-- ── DESKTOP NAV ── -->
 <nav class="nav">
   <div>
     <div class="nav-brand">Neeraj Vaid</div>
@@ -326,8 +478,8 @@ body {
   </div>
 </nav>
 
-<!-- ── QUOTE CARD (always visible) ── -->
-<div class="quote-card" id="quoteCard" title="Click for a new quote" style="max-width:700px;width:calc(100% - 48px);margin:12px 0 0;">
+<!-- ── QUOTE CARD ── -->
+<div class="quote-card" id="quoteCard" title="Click for a new quote">
   <div class="q-text" id="qText"></div>
   <div class="q-author" id="qAuthor"></div>
   <div class="q-hint">tap for a new quote</div>
@@ -335,10 +487,9 @@ body {
 
 <!-- ── TIMER VIEW ── -->
 <div class="view active" id="view-timer">
-
   <div class="mode-tabs">
     <button class="mode-tab active" data-mode="deep">Deep Work</button>
-    <button class="mode-tab" data-mode="calls">Calls & Consults</button>
+    <button class="mode-tab" data-mode="calls">Calls &amp; Consults</button>
     <button class="mode-tab" data-mode="content">Content</button>
     <button class="mode-tab" data-mode="recharge">Recharge</button>
   </div>
@@ -372,24 +523,21 @@ body {
         <button class="btn btn-secondary" id="btnMark" title="Mark done">&#10003;</button>
       </div>
       <div class="slider-group">
-        <span id="modeLabel" style="white-space:nowrap;min-width:70px">Deep work</span>
+        <span id="modeLabel" style="white-space:nowrap;min-width:70px;font-size:12px">Deep work</span>
         <input type="range" id="mainDur" min="5" max="120" step="5" value="50">
         <span class="slider-val" id="mainVal">50m</span>
       </div>
     </div>
   </div>
 
-  <!-- Notepad -->
   <div class="notepad-wrap">
     <label class="field-label">Session notepad</label>
     <textarea class="notepad" id="sessionNotes" placeholder="Brain dump, links, context, decisions made…"></textarea>
-
     <div style="margin-top:12px">
       <label class="field-label">Committed tasks</label>
       <div class="task-checklist" id="taskChecklist"></div>
       <button class="add-task-btn" id="addTaskBtn">+ add task</button>
     </div>
-
     <button class="finish-sprint-btn" id="finishSprintBtn">Log this sprint</button>
   </div>
 </div>
@@ -408,18 +556,15 @@ body {
 
 <!-- ── PLANNER VIEW ── -->
 <div class="view" id="view-planner">
-
-  <!-- Google Calendar connect -->
   <div class="gcal-connect" id="gcalBanner">
     <span class="gcal-icon">📅</span>
     <div class="gcal-info">
       <div class="gcal-title">Google Calendar</div>
-      <div class="gcal-sub" id="gcalSubText">Connect to pull this week's events into your checklist</div>
+      <div class="gcal-sub" id="gcalSubText">Connect to pull this week's events</div>
     </div>
     <button class="gcal-btn" id="gcalBtn">Connect</button>
   </div>
 
-  <!-- Weekly non-negotiables -->
   <div class="planner-section">
     <div class="planner-header">
       <span class="planner-title">This week's non-negotiables</span>
@@ -434,7 +579,6 @@ body {
     <div class="week-reset-note" id="weekResetNote"></div>
   </div>
 
-  <!-- Today's completed tasks -->
   <div class="planner-section">
     <div class="planner-header">
       <span class="planner-title">Today's completed tasks</span>
@@ -444,7 +588,6 @@ body {
       <div id="todayTaskList"></div>
     </div>
   </div>
-
 </div>
 
 <!-- ── STATS VIEW ── -->
@@ -466,30 +609,156 @@ body {
       <div class="stat-sub">sprints</div>
     </div>
   </div>
-
   <div class="chart-section">
     <div class="chart-title">Weekly sprints — last 7 days</div>
-    <div class="chart-wrap">
-      <canvas id="weekChart" height="160"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="weekChart" height="160"></canvas></div>
   </div>
-
   <div class="chart-section">
     <div class="chart-title">Monthly sprints — last 30 days</div>
-    <div class="chart-wrap">
-      <canvas id="monthChart" height="160"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="monthChart" height="160"></canvas></div>
   </div>
-
   <div class="chart-section">
     <div class="chart-title">Mode breakdown (all time)</div>
-    <div class="chart-wrap">
-      <div class="mode-breakdown" id="modeBreakdown"></div>
-    </div>
+    <div class="chart-wrap"><div class="mode-breakdown" id="modeBreakdown"></div></div>
   </div>
 </div>
 
+<!-- ── BOTTOM NAV (mobile) ── -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bottom-nav-btn active" data-view="timer">
+      <span class="bottom-nav-icon">⏱</span>
+      <span class="bottom-nav-label">Timer</span>
+    </button>
+    <button class="bottom-nav-btn" data-view="planner">
+      <span class="bottom-nav-icon">📋</span>
+      <span class="bottom-nav-label">Planner</span>
+    </button>
+    <button class="bottom-nav-btn" data-view="log">
+      <span class="bottom-nav-icon">📂</span>
+      <span class="bottom-nav-label">Sessions</span>
+    </button>
+    <button class="bottom-nav-btn" data-view="stats">
+      <span class="bottom-nav-icon">📊</span>
+      <span class="bottom-nav-label">Stats</span>
+    </button>
+  </div>
+</nav>
+
 <script>
+// ── PIN LOCK ──
+const lockScreen = document.getElementById('lockScreen');
+const lockTitle  = document.getElementById('lockTitle');
+const lockSub    = document.getElementById('lockSub');
+const lockMsg    = document.getElementById('lockMsg');
+const pinDots    = [0,1,2,3].map(i => document.getElementById('d'+i));
+
+let pinInput = '';
+let pinMode = 'enter'; // 'set', 'confirm', 'enter'
+let pinConfirmBuf = '';
+
+function getStoredPin() { return localStorage.getItem('nv_pin') || ''; }
+function setStoredPin(p) { localStorage.setItem('nv_pin', p); }
+
+function updateDots(err) {
+  pinDots.forEach((d, i) => {
+    d.className = 'pin-dot';
+    if (err) d.classList.add('error');
+    else if (i < pinInput.length) d.classList.add('filled');
+  });
+}
+
+function initLock() {
+  const stored = getStoredPin();
+  if (!stored) {
+    pinMode = 'set';
+    lockTitle.textContent = 'Create your PIN';
+    lockSub.textContent = 'Choose a 4-digit PIN to protect your data';
+  } else {
+    pinMode = 'enter';
+    lockTitle.textContent = 'Enter PIN';
+    lockSub.textContent = 'Your data is private';
+  }
+  pinInput = '';
+  updateDots(false);
+}
+
+function handlePinDigit(k) {
+  if (pinInput.length >= 4) return;
+  pinInput += k;
+  updateDots(false);
+  lockMsg.textContent = '';
+  if (pinInput.length === 4) setTimeout(submitPin, 120);
+}
+
+function handlePinDel() {
+  pinInput = pinInput.slice(0,-1);
+  updateDots(false);
+  lockMsg.textContent = '';
+}
+
+function submitPin() {
+  if (pinMode === 'enter') {
+    if (pinInput === getStoredPin()) {
+      unlockApp();
+    } else {
+      updateDots(true);
+      lockMsg.textContent = 'Incorrect PIN. Try again.';
+      setTimeout(() => { pinInput = ''; updateDots(false); lockMsg.textContent = ''; }, 700);
+    }
+  } else if (pinMode === 'set') {
+    pinConfirmBuf = pinInput;
+    pinMode = 'confirm';
+    lockTitle.textContent = 'Confirm your PIN';
+    lockSub.textContent = 'Enter it one more time';
+    pinInput = '';
+    updateDots(false);
+  } else if (pinMode === 'confirm') {
+    if (pinInput === pinConfirmBuf) {
+      setStoredPin(pinInput);
+      unlockApp();
+    } else {
+      updateDots(true);
+      lockMsg.textContent = 'PINs did not match. Try again.';
+      setTimeout(() => {
+        pinMode = 'set'; pinInput = ''; pinConfirmBuf = '';
+        lockTitle.textContent = 'Create your PIN';
+        lockSub.textContent = 'Choose a 4-digit PIN to protect your data';
+        updateDots(false); lockMsg.textContent = '';
+      }, 800);
+    }
+  }
+}
+
+function unlockApp() {
+  lockScreen.classList.add('hidden');
+}
+
+function lockApp() {
+  pinMode = 'enter';
+  pinInput = '';
+  lockTitle.textContent = 'Enter PIN';
+  lockSub.textContent = 'Your data is private';
+  updateDots(false);
+  lockMsg.textContent = '';
+  lockScreen.classList.remove('hidden');
+}
+
+document.querySelectorAll('.pin-key[data-k]').forEach(btn => {
+  btn.addEventListener('click', () => handlePinDigit(btn.dataset.k));
+});
+document.getElementById('pinDelBtn').addEventListener('click', handlePinDel);
+document.addEventListener('keydown', e => {
+  if (!lockScreen.classList.contains('hidden')) {
+    if (e.key >= '0' && e.key <= '9') handlePinDigit(e.key);
+    if (e.key === 'Backspace') handlePinDel();
+  }
+});
+document.getElementById('mobileLockBtn').addEventListener('click', lockApp);
+
+initLock();
+
+// ── APP ──
 const CIRC = 2 * Math.PI * 80;
 
 const modeConfig = {
@@ -539,28 +808,21 @@ const quotes = {
   recharge: ['Recovery is part of the system.', 'A sharp mind makes better decisions.', 'Rest is not laziness. It is fuel.'],
 };
 
-// ── State ──
 let currentMode = 'deep';
 let totalSecs = 50 * 60;
 let remainingSecs = totalSecs;
 let running = false;
 let intervalId = null;
 let sessionStartTime = null;
-let taskItems = []; // {text, done}
+let taskItems = [];
 let currentFilter = 'all';
 let weekChart = null, monthChart = null;
 
-// ── Storage ──
-function loadSessions() {
-  try { return JSON.parse(localStorage.getItem('nv_sessions') || '[]'); } catch(e) { return []; }
-}
+function loadSessions() { try { return JSON.parse(localStorage.getItem('nv_sessions') || '[]'); } catch(e) { return []; } }
 function saveSessions(s) { localStorage.setItem('nv_sessions', JSON.stringify(s)); }
-function countCompleted() {
-  try { return parseInt(localStorage.getItem('nv_streak') || '0'); } catch(e) { return 0; }
-}
+function countCompleted() { try { return parseInt(localStorage.getItem('nv_streak') || '0'); } catch(e) { return 0; } }
 function setCompleted(n) { localStorage.setItem('nv_streak', String(n)); }
 
-// ── DOM refs ──
 const display    = document.getElementById('timerDisplay');
 const phaseEl    = document.getElementById('timerPhase');
 const progress   = document.getElementById('progressRing');
@@ -579,511 +841,356 @@ const addTaskBtn = document.getElementById('addTaskBtn');
 const finishBtn  = document.getElementById('finishSprintBtn');
 const logList    = document.getElementById('logList');
 
-// ── Helpers ──
 function pad(n) { return String(n).padStart(2,'0'); }
-function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-}
-function fmtTime(iso) {
-  return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-}
+function fmtDate(iso) { const d=new Date(iso); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function fmtTime(iso) { return new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function todayStr() { return new Date().toISOString().slice(0,10); }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Timer ──
 function updateDisplay() {
-  const m = Math.floor(remainingSecs/60), s = remainingSecs%60;
-  display.textContent = `${pad(m)}:${pad(s)}`;
-  const frac = remainingSecs / totalSecs;
-  progress.style.strokeDashoffset = CIRC * (1 - frac);
+  const m=Math.floor(remainingSecs/60), s=remainingSecs%60;
+  display.textContent=`${pad(m)}:${pad(s)}`;
+  progress.style.strokeDashoffset = CIRC*(1-remainingSecs/totalSecs);
 }
 
 function setMode(mode) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
-  const cfg = modeConfig[mode];
-  phaseEl.textContent = cfg.label;
-  modeLabel.textContent = cfg.label.charAt(0).toUpperCase() + cfg.label.slice(1);
-  mainDur.value = cfg.defaultMin;
-  mainVal.textContent = cfg.defaultMin + 'm';
-  progress.style.stroke = cfg.color;
-  quoteEl.textContent = '"' + quotes[mode][Math.floor(Math.random() * quotes[mode].length)] + '"';
+  currentMode=mode;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===mode));
+  const cfg=modeConfig[mode];
+  phaseEl.textContent=cfg.label;
+  modeLabel.textContent=cfg.label.charAt(0).toUpperCase()+cfg.label.slice(1);
+  mainDur.value=cfg.defaultMin; mainVal.textContent=cfg.defaultMin+'m';
+  progress.style.stroke=cfg.color;
+  quoteEl.textContent='"'+quotes[mode][Math.floor(Math.random()*quotes[mode].length)]+'"';
   stopTimer(); resetTimer(); setLegendQuote();
 }
 
 function resetTimer() {
-  totalSecs = parseInt(mainDur.value) * 60;
-  remainingSecs = totalSecs;
-  sessionStartTime = null;
-  updateDisplay();
+  totalSecs=parseInt(mainDur.value)*60; remainingSecs=totalSecs;
+  sessionStartTime=null; updateDisplay();
 }
-
-function stopTimer() {
-  clearInterval(intervalId); running = false; btnPlay.innerHTML = '&#9654;';
-}
-
-function tick() {
-  if (remainingSecs <= 0) { stopTimer(); autoFinish(); return; }
-  remainingSecs--; updateDisplay();
-}
-
+function stopTimer() { clearInterval(intervalId); running=false; btnPlay.innerHTML='&#9654;'; }
+function tick() { if(remainingSecs<=0){stopTimer();autoFinish();return;} remainingSecs--; updateDisplay(); }
 function togglePlay() {
-  if (running) { stopTimer(); }
-  else {
-    if (!sessionStartTime) sessionStartTime = new Date().toISOString();
-    intervalId = setInterval(tick, 1000); running = true; btnPlay.innerHTML = '&#9646;&#9646;';
+  if(running){stopTimer();}
+  else{
+    if(!sessionStartTime) sessionStartTime=new Date().toISOString();
+    intervalId=setInterval(tick,1000); running=true; btnPlay.innerHTML='&#9646;&#9646;';
   }
 }
+function autoFinish(){ logSprint(false); playBeep(); }
 
-function autoFinish() { logSprint(false); playBeep(); }
-
-// ── Checklist ──
 function renderChecklist() {
-  checklistEl.innerHTML = '';
-  taskItems.forEach((item, i) => {
-    const row = document.createElement('div');
-    row.className = 'task-check-row';
-    row.innerHTML = `
-      <button class="check-btn ${item.done ? 'done' : ''}" data-i="${i}">${item.done ? '✓' : ''}</button>
-      <input class="task-check-input ${item.done ? 'done' : ''}" data-i="${i}" value="${escHtml(item.text)}" placeholder="task…">
-    `;
+  checklistEl.innerHTML='';
+  taskItems.forEach((item,i)=>{
+    const row=document.createElement('div');
+    row.className='task-check-row';
+    row.innerHTML=`<button class="check-btn ${item.done?'done':''}" data-i="${i}">${item.done?'✓':''}</button>
+      <input class="task-check-input ${item.done?'done':''}" data-i="${i}" value="${escHtml(item.text)}" placeholder="task…">`;
     checklistEl.appendChild(row);
   });
 }
 
 function addTask(text) {
-  taskItems.push({ text: text || '', done: false });
-  renderChecklist();
-  const inputs = checklistEl.querySelectorAll('.task-check-input');
-  if (inputs.length) inputs[inputs.length-1].focus();
+  taskItems.push({text:text||'',done:false}); renderChecklist();
+  const inputs=checklistEl.querySelectorAll('.task-check-input');
+  if(inputs.length) inputs[inputs.length-1].focus();
 }
 
-checklistEl.addEventListener('click', e => {
-  const btn = e.target.closest('.check-btn');
-  if (btn) {
-    const i = parseInt(btn.dataset.i);
-    taskItems[i].done = !taskItems[i].done;
-    renderChecklist();
-  }
+checklistEl.addEventListener('click',e=>{
+  const btn=e.target.closest('.check-btn');
+  if(btn){const i=parseInt(btn.dataset.i); taskItems[i].done=!taskItems[i].done; renderChecklist();}
 });
-
-checklistEl.addEventListener('input', e => {
-  const inp = e.target.closest('.task-check-input');
-  if (inp) taskItems[parseInt(inp.dataset.i)].text = inp.value;
+checklistEl.addEventListener('input',e=>{
+  const inp=e.target.closest('.task-check-input');
+  if(inp) taskItems[parseInt(inp.dataset.i)].text=inp.value;
 });
+checklistEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();addTask();} });
+addTaskBtn.addEventListener('click',()=>addTask());
 
-checklistEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter') { e.preventDefault(); addTask(); }
-});
-
-addTaskBtn.addEventListener('click', () => addTask());
-
-// ── Log Sprint ──
 function logSprint(manual) {
-  const spentMins = Math.round((totalSecs - remainingSecs) / 60);
-  if (!manual && spentMins < 1) return;
-  const sessions = loadSessions();
-  const entry = {
-    id: Date.now(),
-    date: new Date().toISOString(),
-    mode: currentMode,
-    title: taskInput.value.trim() || modeConfig[currentMode].label,
-    duration: spentMins || parseInt(mainDur.value),
-    notes: notesEl.value.trim(),
-    tasks: taskItems.slice(),
-    startedAt: sessionStartTime || new Date().toISOString(),
+  const spentMins=Math.round((totalSecs-remainingSecs)/60);
+  if(!manual && spentMins<1) return;
+  const sessions=loadSessions();
+  const entry={
+    id:Date.now(), date:new Date().toISOString(), mode:currentMode,
+    title:taskInput.value.trim()||modeConfig[currentMode].label,
+    duration:spentMins||parseInt(mainDur.value),
+    notes:notesEl.value.trim(), tasks:taskItems.slice(),
+    startedAt:sessionStartTime||new Date().toISOString(),
   };
-  sessions.unshift(entry);
-  saveSessions(sessions);
-  if (currentMode !== 'recharge') {
-    setCompleted(countCompleted() + 1);
-  }
+  sessions.unshift(entry); saveSessions(sessions);
+  if(currentMode!=='recharge') setCompleted(countCompleted()+1);
   updateStreak();
-  // reset notepad
-  notesEl.value = ''; taskItems = []; renderChecklist(); taskInput.value = '';
+  notesEl.value=''; taskItems=[]; renderChecklist(); taskInput.value='';
   stopTimer(); resetTimer();
   alert(`Sprint logged: "${entry.title}" (${entry.duration}m)`);
 }
 
-finishBtn.addEventListener('click', () => logSprint(true));
-btnMark.addEventListener('click', () => logSprint(true));
-btnReset.addEventListener('click', () => { stopTimer(); resetTimer(); });
-btnPlay.addEventListener('click', togglePlay);
-mainDur.addEventListener('input', () => { mainVal.textContent = mainDur.value+'m'; if (!running) resetTimer(); });
-document.querySelectorAll('.mode-tab').forEach(t => t.addEventListener('click', () => setMode(t.dataset.mode)));
+finishBtn.addEventListener('click',()=>logSprint(true));
+btnMark.addEventListener('click',()=>logSprint(true));
+btnReset.addEventListener('click',()=>{stopTimer();resetTimer();});
+btnPlay.addEventListener('click',togglePlay);
+mainDur.addEventListener('input',()=>{mainVal.textContent=mainDur.value+'m'; if(!running) resetTimer();});
+document.querySelectorAll('.mode-tab').forEach(t=>t.addEventListener('click',()=>setMode(t.dataset.mode)));
 
-// ── Streak ──
 function updateStreak() {
-  const n = countCompleted();
-  streakEl.innerHTML = Array.from({length:4},(_,i) =>
-    `<div class="streak-pip ${i < n%4 || (n>0 && n%4===0) ? 'done':''}"></div>`
-  ).join('') + `<span class="streak-label">${n} sprint${n!==1?'s':''} logged</span>`;
+  const n=countCompleted();
+  streakEl.innerHTML=Array.from({length:4},(_,i)=>
+    `<div class="streak-pip ${i<n%4||(n>0&&n%4===0)?'done':''}"></div>`
+  ).join('')+`<span class="streak-label">${n} sprint${n!==1?'s':''} logged</span>`;
 }
 
-// ── Beep ──
 function playBeep() {
   try {
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    [[0,660],[0.22,880],[0.44,1100]].forEach(([t,f]) => {
-      const o=ctx.createOscillator(), g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value=f;
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [[0,660],[0.22,880],[0.44,1100]].forEach(([t,f])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);o.frequency.value=f;
       g.gain.setValueAtTime(0.1,ctx.currentTime+t);
       g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.2);
-      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.22);
+      o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+0.22);
     });
-  } catch(e){}
+  }catch(e){}
 }
 
-// ── LOG VIEW ──
 function renderLog() {
-  const sessions = loadSessions();
-  const filtered = currentFilter==='all' ? sessions :
-    sessions.filter(s => s.mode === currentFilter || (currentFilter==='calls' && s.mode==='calls'));
-  if (!filtered.length) {
-    logList.innerHTML = '<div class="log-empty">No sessions logged yet.</div>'; return;
-  }
-  logList.innerHTML = filtered.map(s => {
-    const taskHtml = s.tasks && s.tasks.length ? s.tasks.map(t =>
+  const sessions=loadSessions();
+  const filtered=currentFilter==='all'?sessions:sessions.filter(s=>s.mode===currentFilter);
+  if(!filtered.length){logList.innerHTML='<div class="log-empty">No sessions logged yet.</div>';return;}
+  logList.innerHTML=filtered.map(s=>{
+    const taskHtml=s.tasks&&s.tasks.length?s.tasks.map(t=>
       `<div class="log-task-item ${t.done?'done-task':''}">
         <span class="bullet">${t.done?'✓':'·'}</span>
         <span>${escHtml(t.text)}</span>
-      </div>`
-    ).join('') : '';
-    const notesHtml = s.notes ? `<div class="notepad-ro">${escHtml(s.notes)}</div>` : '';
-    return `
-    <div class="log-card" data-id="${s.id}">
+      </div>`).join(''):'';
+    const notesHtml=s.notes?`<div class="notepad-ro">${escHtml(s.notes)}</div>`:'';
+    return `<div class="log-card" data-id="${s.id}">
       <div class="log-card-header">
         <span class="log-mode-dot ${s.mode==='recharge'?'recharge':''}"></span>
         <span class="log-card-title">${escHtml(s.title)}</span>
         <div class="log-card-meta">
           <span>${s.duration}m</span>
-          <span>${fmtDate(s.date)}</span>
+          <span class="log-date">${fmtDate(s.date)}</span>
           <span>${fmtTime(s.date)}</span>
           <span class="log-chevron">›</span>
         </div>
       </div>
       <div class="log-card-body">
-        ${taskHtml ? '<div class="log-tasks-list">'+taskHtml+'</div>' : ''}
+        ${taskHtml?'<div class="log-tasks-list">'+taskHtml+'</div>':''}
         ${notesHtml}
-        ${!taskHtml && !notesHtml ? '<p style="font-size:12px;color:var(--muted);margin-top:10px">No notes recorded.</p>' : ''}
+        ${!taskHtml&&!notesHtml?'<p style="font-size:12px;color:var(--muted);margin-top:10px">No notes recorded.</p>':''}
       </div>
     </div>`;
   }).join('');
-
-  logList.querySelectorAll('.log-card').forEach(card => {
-    card.addEventListener('click', () => card.classList.toggle('open'));
-  });
+  logList.querySelectorAll('.log-card').forEach(card=>card.addEventListener('click',()=>card.classList.toggle('open')));
 }
 
-document.querySelectorAll('.filter-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    currentFilter = b.dataset.filter;
-    renderLog();
+document.querySelectorAll('.filter-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); currentFilter=b.dataset.filter; renderLog();
   });
 });
 
-// ── STATS VIEW ──
 function buildStats() {
-  const sessions = loadSessions();
-  const now = new Date();
-  const todayKey = todayStr();
+  const sessions=loadSessions();
+  const now=new Date(); const todayKey=todayStr();
+  const toKey=d=>new Date(d).toISOString().slice(0,10);
+  const todayCount=sessions.filter(s=>toKey(s.date)===todayKey).length;
+  const weekStart=new Date(now); weekStart.setDate(now.getDate()-6); weekStart.setHours(0,0,0,0);
+  const monthStart=new Date(now); monthStart.setDate(now.getDate()-29); monthStart.setHours(0,0,0,0);
+  document.getElementById('statToday').textContent=sessions.filter(s=>toKey(s.date)===todayKey).length;
+  document.getElementById('statWeek').textContent=sessions.filter(s=>new Date(s.date)>=weekStart).length;
+  document.getElementById('statMonth').textContent=sessions.filter(s=>new Date(s.date)>=monthStart).length;
 
-  const toKey = d => new Date(d).toISOString().slice(0,10);
+  const days7=Array.from({length:7},(_,i)=>{const d=new Date(now);d.setDate(now.getDate()-(6-i));return d.toISOString().slice(0,10);});
+  const weekData=days7.map(k=>sessions.filter(s=>toKey(s.date)===k).length);
+  const weekLabels=days7.map(k=>new Date(k+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short'}));
 
-  const todayCount  = sessions.filter(s => toKey(s.date) === todayKey).length;
-  const weekStart   = new Date(now); weekStart.setDate(now.getDate() - 6); weekStart.setHours(0,0,0,0);
-  const monthStart  = new Date(now); monthStart.setDate(now.getDate() - 29); monthStart.setHours(0,0,0,0);
-  const weekCount   = sessions.filter(s => new Date(s.date) >= weekStart).length;
-  const monthCount  = sessions.filter(s => new Date(s.date) >= monthStart).length;
-
-  document.getElementById('statToday').textContent = todayCount;
-  document.getElementById('statWeek').textContent  = weekCount;
-  document.getElementById('statMonth').textContent = monthCount;
-
-  // weekly chart — last 7 days
-  const days7 = Array.from({length:7},(_,i) => {
-    const d = new Date(now); d.setDate(now.getDate() - (6-i));
-    return d.toISOString().slice(0,10);
-  });
-  const weekData = days7.map(k => sessions.filter(s => toKey(s.date)===k).length);
-  const weekLabels = days7.map(k => {
-    const d = new Date(k+'T12:00:00');
-    return d.toLocaleDateString('en-GB',{weekday:'short'});
-  });
-
-  // monthly chart — last 30 days grouped into 6 buckets of 5 days
-  const buckets = 6, bucketSize = 5;
-  const monthLabels = [], monthData = [];
-  for (let b = buckets-1; b >= 0; b--) {
-    const end = new Date(now); end.setDate(now.getDate() - b*bucketSize); end.setHours(23,59,59,999);
-    const start = new Date(end); start.setDate(end.getDate() - (bucketSize-1)); start.setHours(0,0,0,0);
+  const buckets=6,bSize=5,monthLabels=[],monthData=[];
+  for(let b=buckets-1;b>=0;b--){
+    const end=new Date(now);end.setDate(now.getDate()-b*bSize);end.setHours(23,59,59,999);
+    const start=new Date(end);start.setDate(end.getDate()-(bSize-1));start.setHours(0,0,0,0);
     monthLabels.push(start.toLocaleDateString('en-GB',{day:'numeric',month:'short'}));
-    monthData.push(sessions.filter(s => { const d=new Date(s.date); return d>=start && d<=end; }).length);
+    monthData.push(sessions.filter(s=>{const d=new Date(s.date);return d>=start&&d<=end;}).length);
   }
 
-  const chartDefaults = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.raw} sprint${c.raw!==1?'s':''}` } } },
-    scales: {
-      x: { grid: { color: '#1e1d1a' }, ticks: { color: '#5a5648', font: { size: 11 } } },
-      y: { grid: { color: '#1e1d1a' }, ticks: { color: '#5a5648', font: { size: 11 }, stepSize: 1, precision: 0 }, beginAtZero: true },
+  const chartOpts={
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} sprint${c.raw!==1?'s':''}`}}},
+    scales:{
+      x:{grid:{color:'#1e1d1a'},ticks:{color:'#5a5648',font:{size:10}}},
+      y:{grid:{color:'#1e1d1a'},ticks:{color:'#5a5648',font:{size:10},stepSize:1,precision:0},beginAtZero:true},
     },
   };
+  if(weekChart) weekChart.destroy();
+  weekChart=new Chart(document.getElementById('weekChart'),{type:'bar',data:{labels:weekLabels,datasets:[{data:weekData,backgroundColor:'#00994f',borderRadius:5,hoverBackgroundColor:'#00e676'}]},options:{...chartOpts,animation:{duration:400}}});
+  if(monthChart) monthChart.destroy();
+  monthChart=new Chart(document.getElementById('monthChart'),{type:'bar',data:{labels:monthLabels,datasets:[{data:monthData,backgroundColor:'#0d4a26',borderRadius:5,hoverBackgroundColor:'#39e07a'}]},options:{...chartOpts,animation:{duration:400}}});
 
-  if (weekChart) weekChart.destroy();
-  weekChart = new Chart(document.getElementById('weekChart'), {
-    type: 'bar',
-    data: {
-      labels: weekLabels,
-      datasets: [{ data: weekData, backgroundColor: '#00994f', borderRadius: 5, hoverBackgroundColor: '#00e676' }]
-    },
-    options: { ...chartDefaults, animation: { duration: 400 } },
-  });
-
-  if (monthChart) monthChart.destroy();
-  monthChart = new Chart(document.getElementById('monthChart'), {
-    type: 'bar',
-    data: {
-      labels: monthLabels,
-      datasets: [{ data: monthData, backgroundColor: '#0d4a26', borderRadius: 5, hoverBackgroundColor: '#39e07a' }]
-    },
-    options: { ...chartDefaults, animation: { duration: 400 } },
-  });
-
-  // mode breakdown
-  const modeCounts = { deep:0, calls:0, content:0, recharge:0 };
-  sessions.forEach(s => { if (modeCounts[s.mode]!==undefined) modeCounts[s.mode]++; });
-  const maxMode = Math.max(...Object.values(modeCounts), 1);
-  const modeNames = { deep:'Deep Work', calls:'Calls & Consults', content:'Content', recharge:'Recharge' };
-  document.getElementById('modeBreakdown').innerHTML = Object.entries(modeCounts).map(([m,n]) => `
+  const modeCounts={deep:0,calls:0,content:0,recharge:0};
+  sessions.forEach(s=>{if(modeCounts[s.mode]!==undefined)modeCounts[s.mode]++;});
+  const maxMode=Math.max(...Object.values(modeCounts),1);
+  const modeNames={deep:'Deep Work',calls:'Calls & Consults',content:'Content',recharge:'Recharge'};
+  document.getElementById('modeBreakdown').innerHTML=Object.entries(modeCounts).map(([m,n])=>`
     <div class="mode-bar-row">
       <span class="mode-bar-label">${modeNames[m]}</span>
-      <div class="mode-bar-track">
-        <div class="mode-bar-fill ${m==='recharge'?'green':''}" style="width:${Math.round(n/maxMode*100)}%"></div>
-      </div>
+      <div class="mode-bar-track"><div class="mode-bar-fill ${m==='recharge'?'blue':''}" style="width:${Math.round(n/maxMode*100)}%"></div></div>
       <span class="mode-bar-count">${n}</span>
     </div>`).join('');
 }
 
 // ── PLANNER ──
 const GCAL_CLIENT_ID = '722366162239-r6la60ollfabh6pv4u94pjpacg4igd7l.apps.googleusercontent.com';
+let gcalConnected=false;
 
 function weekKey() {
-  const d = new Date();
-  const day = d.getDay(); // 0=Sun
-  const monday = new Date(d);
-  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-  return monday.toISOString().slice(0, 10);
+  const d=new Date(),day=d.getDay(),mon=new Date(d);
+  mon.setDate(d.getDate()-(day===0?6:day-1));
+  return mon.toISOString().slice(0,10);
 }
-
 function weekRangeLabel() {
-  const d = new Date();
-  const day = d.getDay();
-  const mon = new Date(d); mon.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-  const fmt = dt => dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  return fmt(mon) + ' – ' + fmt(sun);
+  const d=new Date(),day=d.getDay(),mon=new Date(d);
+  mon.setDate(d.getDate()-(day===0?6:day-1));
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const fmt=dt=>dt.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  return fmt(mon)+' – '+fmt(sun);
 }
-
-function daysUntilMonday() {
-  const d = new Date().getDay();
-  return d === 0 ? 1 : 8 - d;
-}
-
-function loadWeekly() {
-  try {
-    const raw = JSON.parse(localStorage.getItem('nv_weekly') || '{}');
-    if (raw.weekKey !== weekKey()) return { weekKey: weekKey(), items: [] };
+function daysUntilMonday(){const d=new Date().getDay();return d===0?1:8-d;}
+function loadWeekly(){
+  try{const raw=JSON.parse(localStorage.getItem('nv_weekly')||'{}');
+    if(raw.weekKey!==weekKey()) return{weekKey:weekKey(),items:[]};
     return raw;
-  } catch(e) { return { weekKey: weekKey(), items: [] }; }
+  }catch(e){return{weekKey:weekKey(),items:[]};}
 }
+function saveWeekly(data){localStorage.setItem('nv_weekly',JSON.stringify(data));}
 
-function saveWeekly(data) { localStorage.setItem('nv_weekly', JSON.stringify(data)); }
-
-function renderWeekly() {
-  const data = loadWeekly();
-  const list = document.getElementById('weeklyList');
-  const fill = document.getElementById('weeklyProgressFill');
-  const resetNote = document.getElementById('weekResetNote');
-  document.getElementById('weekRangeLabel').textContent = weekRangeLabel();
-  document.getElementById('todayDateLabel').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  const total = data.items.length;
-  const done = data.items.filter(i => i.done).length;
-  fill.style.width = total ? Math.round(done / total * 100) + '%' : '0%';
-  resetNote.textContent = total ? `${done}/${total} done · resets in ${daysUntilMonday()} day${daysUntilMonday() !== 1 ? 's' : ''}` : 'Add your must-dos for this week';
-
-  if (!total) {
-    list.innerHTML = '<div class="today-empty">No items yet. Add your weekly non-negotiables below.</div>';
-    return;
-  }
-
-  list.innerHTML = data.items.map((item, i) => `
-    <div class="weekly-item ${item.done ? 'done-item' : ''}">
-      <button class="weekly-check ${item.done ? 'done' : ''}" data-wi="${i}">${item.done ? '✓' : ''}</button>
-      <span class="weekly-item-text ${item.done ? 'done' : ''}">${escHtml(item.text)}</span>
-      ${item.fromCal ? '<span style="font-size:10px;color:var(--muted);">📅</span>' : ''}
+function renderWeekly(){
+  const data=loadWeekly();
+  const list=document.getElementById('weeklyList');
+  const fill=document.getElementById('weeklyProgressFill');
+  const resetNote=document.getElementById('weekResetNote');
+  document.getElementById('weekRangeLabel').textContent=weekRangeLabel();
+  document.getElementById('todayDateLabel').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const total=data.items.length,done=data.items.filter(i=>i.done).length;
+  fill.style.width=total?Math.round(done/total*100)+'%':'0%';
+  resetNote.textContent=total?`${done}/${total} done · resets in ${daysUntilMonday()} day${daysUntilMonday()!==1?'s':''}`:'Add your must-dos for this week';
+  if(!total){list.innerHTML='<div class="today-empty">No items yet. Add your weekly non-negotiables below.</div>';return;}
+  list.innerHTML=data.items.map((item,i)=>`
+    <div class="weekly-item ${item.done?'done-item':''}">
+      <button class="weekly-check ${item.done?'done':''}" data-wi="${i}">${item.done?'✓':''}</button>
+      <span class="weekly-item-text ${item.done?'done':''}">${escHtml(item.text)}</span>
+      ${item.fromCal?'<span style="font-size:10px;color:var(--muted);">📅</span>':''}
       <button class="weekly-item-del" data-wd="${i}">×</button>
     </div>`).join('');
-
-  list.querySelectorAll('.weekly-check').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const d = loadWeekly();
-      d.items[parseInt(btn.dataset.wi)].done ^= 1;
-      saveWeekly(d); renderWeekly();
-    });
-  });
-  list.querySelectorAll('.weekly-item-del').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const d = loadWeekly();
-      d.items.splice(parseInt(btn.dataset.wd), 1);
-      saveWeekly(d); renderWeekly();
-    });
-  });
+  list.querySelectorAll('.weekly-check').forEach(btn=>btn.addEventListener('click',()=>{
+    const d=loadWeekly();d.items[parseInt(btn.dataset.wi)].done^=1;saveWeekly(d);renderWeekly();
+  }));
+  list.querySelectorAll('.weekly-item-del').forEach(btn=>btn.addEventListener('click',()=>{
+    const d=loadWeekly();d.items.splice(parseInt(btn.dataset.wd),1);saveWeekly(d);renderWeekly();
+  }));
 }
 
-function addWeeklyItem(text) {
-  if (!text.trim()) return;
-  const data = loadWeekly();
-  data.items.push({ text: text.trim(), done: false, fromCal: false });
-  saveWeekly(data); renderWeekly();
+function addWeeklyItem(text){
+  if(!text.trim()) return;
+  const data=loadWeekly();
+  data.items.push({text:text.trim(),done:false,fromCal:false});
+  saveWeekly(data);renderWeekly();
 }
-
-document.getElementById('addWeeklyBtn').addEventListener('click', () => {
-  const inp = document.getElementById('addWeeklyInput');
-  addWeeklyItem(inp.value); inp.value = '';
+document.getElementById('addWeeklyBtn').addEventListener('click',()=>{
+  const inp=document.getElementById('addWeeklyInput');
+  addWeeklyItem(inp.value);inp.value='';
 });
-document.getElementById('addWeeklyInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    addWeeklyItem(e.target.value); e.target.value = '';
-  }
+document.getElementById('addWeeklyInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){addWeeklyItem(e.target.value);e.target.value='';}
 });
 
-// ── TODAY'S TASKS ──
-function renderTodayTasks() {
-  const sessions = loadSessions();
-  const todayKey = todayStr();
-  const toKey = d => new Date(d).toISOString().slice(0, 10);
-  const todaySessions = sessions.filter(s => toKey(s.date) === todayKey);
-
-  const listEl = document.getElementById('todayTaskList');
-  const allTasks = [];
-  todaySessions.forEach(s => {
-    (s.tasks || []).forEach(t => {
-      allTasks.push({ text: t.text, done: t.done, session: s.title, time: fmtTime(s.date) });
-    });
+function renderTodayTasks(){
+  const sessions=loadSessions(),todayKey=todayStr();
+  const toKey=d=>new Date(d).toISOString().slice(0,10);
+  const listEl=document.getElementById('todayTaskList');
+  const allTasks=[];
+  sessions.filter(s=>toKey(s.date)===todayKey).forEach(s=>{
+    (s.tasks||[]).forEach(t=>allTasks.push({text:t.text,done:t.done,session:s.title,time:fmtTime(s.date)}));
   });
-
-  if (!allTasks.length) {
-    listEl.innerHTML = '<div class="today-empty">No tasks logged today. Start a sprint and add tasks to your session.</div>';
-    return;
-  }
-
-  // done first, then pending
-  const sorted = [...allTasks.filter(t => t.done), ...allTasks.filter(t => !t.done)];
-  listEl.innerHTML = sorted.map(t => `
+  if(!allTasks.length){listEl.innerHTML='<div class="today-empty">No tasks logged today. Start a sprint and add tasks to your session.</div>';return;}
+  const sorted=[...allTasks.filter(t=>t.done),...allTasks.filter(t=>!t.done)];
+  listEl.innerHTML=sorted.map(t=>`
     <div class="today-task-item">
-      <span class="today-task-bullet ${t.done ? '' : 'pending'}">${t.done ? '✓' : '○'}</span>
-      <span class="today-task-label ${t.done ? '' : 'pending'}">${escHtml(t.text)}</span>
+      <span class="today-task-bullet ${t.done?'':'pending'}">${t.done?'✓':'○'}</span>
+      <span class="today-task-label ${t.done?'':'pending'}">${escHtml(t.text)}</span>
       <span class="today-task-session">${escHtml(t.session)} · ${t.time}</span>
     </div>`).join('');
 }
 
-// ── GOOGLE CALENDAR ──
-let gcalConnected = false;
-
-function initGcal() {
-  if (!GCAL_CLIENT_ID) return; // not configured yet
-  const script = document.createElement('script');
-  script.src = 'https://accounts.google.com/gsi/client';
-  script.onload = () => { document.getElementById('gcalBtn').textContent = 'Sign in'; };
-  document.head.appendChild(script);
+function initGcal(){
+  if(!GCAL_CLIENT_ID) return;
+  const s=document.createElement('script');
+  s.src='https://accounts.google.com/gsi/client';
+  s.onload=()=>{ document.getElementById('gcalBtn').textContent='Sign in'; };
+  document.head.appendChild(s);
 }
-
-function gcalSignIn() {
-  if (!GCAL_CLIENT_ID) {
-    document.getElementById('gcalSubText').textContent = 'Paste your Google OAuth Client ID into the app to enable this.';
-    return;
-  }
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: GCAL_CLIENT_ID,
-    scope: 'https://www.googleapis.com/auth/calendar.readonly',
-    callback: (resp) => { if (resp.access_token) fetchCalEvents(resp.access_token); },
+function gcalSignIn(){
+  if(!GCAL_CLIENT_ID){document.getElementById('gcalSubText').textContent='OAuth not configured.';return;}
+  const client=google.accounts.oauth2.initTokenClient({
+    client_id:GCAL_CLIENT_ID,
+    scope:'https://www.googleapis.com/auth/calendar.readonly',
+    callback:(resp)=>{if(resp.access_token) fetchCalEvents(resp.access_token);},
   });
   client.requestAccessToken();
 }
-
-async function fetchCalEvents(token) {
-  const now = new Date();
-  const day = now.getDay();
-  const monday = new Date(now); monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1)); monday.setHours(0,0,0,0);
-  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6); sunday.setHours(23,59,59,999);
-
-  const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${monday.toISOString()}&timeMax=${sunday.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`;
-  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
-  const data = await res.json();
-
-  const events = (data.items || []).filter(e => e.summary);
-  const weekData = loadWeekly();
-  const existingTexts = weekData.items.map(i => i.text.toLowerCase());
-
-  events.forEach(e => {
-    if (!existingTexts.includes(e.summary.toLowerCase())) {
-      weekData.items.push({ text: e.summary, done: false, fromCal: true });
-    }
-  });
+async function fetchCalEvents(token){
+  const now=new Date(),day=now.getDay();
+  const mon=new Date(now);mon.setDate(now.getDate()-(day===0?6:day-1));mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);
+  const url=`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${mon.toISOString()}&timeMax=${sun.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`;
+  const res=await fetch(url,{headers:{Authorization:'Bearer '+token}});
+  const data=await res.json();
+  const events=(data.items||[]).filter(e=>e.summary);
+  const weekData=loadWeekly();
+  const existingTexts=weekData.items.map(i=>i.text.toLowerCase());
+  events.forEach(e=>{if(!existingTexts.includes(e.summary.toLowerCase()))weekData.items.push({text:e.summary,done:false,fromCal:true});});
   saveWeekly(weekData);
-
-  gcalConnected = true;
-  document.getElementById('gcalBtn').textContent = 'Connected ✓';
-  document.getElementById('gcalBtn').className = 'gcal-btn connected';
-  document.getElementById('gcalSubText').textContent = `${events.length} events imported this week`;
+  gcalConnected=true;
+  document.getElementById('gcalBtn').textContent='Connected ✓';
+  document.getElementById('gcalBtn').className='gcal-btn connected';
+  document.getElementById('gcalSubText').textContent=`${events.length} events imported this week`;
   renderWeekly();
 }
+document.getElementById('gcalBtn').addEventListener('click',gcalSignIn);
 
-document.getElementById('gcalBtn').addEventListener('click', gcalSignIn);
-
-// ── NAV ──
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('view-'+tab.dataset.view).classList.add('active');
-    if (tab.dataset.view === 'log') renderLog();
-    if (tab.dataset.view === 'stats') buildStats();
-    if (tab.dataset.view === 'planner') { renderWeekly(); renderTodayTasks(); }
-  });
+// ── NAV (shared handler) ──
+function switchView(view) {
+  document.querySelectorAll('.nav-tab,.bottom-nav-btn').forEach(t=>t.classList.toggle('active',t.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  if(view==='log') renderLog();
+  if(view==='stats') buildStats();
+  if(view==='planner'){renderWeekly();renderTodayTasks();}
+}
+document.querySelectorAll('.nav-tab,.bottom-nav-btn').forEach(tab=>{
+  tab.addEventListener('click',()=>switchView(tab.dataset.view));
 });
 
 // ── Init ──
-let lastQuoteIdx = -1;
-function setLegendQuote() {
-  let idx;
-  do { idx = Math.floor(Math.random() * legendQuotes.length); } while (idx === lastQuoteIdx);
-  lastQuoteIdx = idx;
-  const q = legendQuotes[idx];
-  const textEl = document.getElementById('qText');
-  const authorEl = document.getElementById('qAuthor');
-  textEl.style.transition = 'opacity 0.3s';
-  textEl.style.opacity = '0';
-  setTimeout(() => {
-    textEl.textContent = '“' + q.text + '”';
-    authorEl.textContent = '— ' + q.author;
-    textEl.style.opacity = '1';
-  }, 220);
+let lastQuoteIdx=-1;
+function setLegendQuote(){
+  let idx;do{idx=Math.floor(Math.random()*legendQuotes.length);}while(idx===lastQuoteIdx);
+  lastQuoteIdx=idx;
+  const q=legendQuotes[idx];
+  const textEl=document.getElementById('qText');
+  const authorEl=document.getElementById('qAuthor');
+  textEl.style.transition='opacity 0.3s';textEl.style.opacity='0';
+  setTimeout(()=>{textEl.textContent='"'+q.text+'"';authorEl.textContent='— '+q.author;textEl.style.opacity='1';},220);
 }
-
-document.getElementById('quoteCard').addEventListener('click', setLegendQuote);
+document.getElementById('quoteCard').addEventListener('click',setLegendQuote);
 
 setMode('deep');
 setLegendQuote();
 updateStreak();
 renderChecklist();
+initGcal();
 </script>
 </body>
 </html>
