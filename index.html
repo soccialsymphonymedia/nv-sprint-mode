@@ -111,6 +111,25 @@ body {
 
 .quote { font-size: 12px; color: #888888; font-style: italic; line-height: 1.6; }
 
+.quote-card {
+  width: 100%; margin-bottom: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+}
+.quote-card:hover { background: var(--surface2); }
+.quote-card .q-text {
+  font-size: 13px; color: var(--text); line-height: 1.65;
+  font-style: italic; transition: opacity 0.3s;
+}
+.quote-card .q-author {
+  font-size: 11px; color: var(--accent); letter-spacing: 0.08em;
+  text-transform: uppercase; font-style: normal; font-weight: 500;
+}
+.quote-card .q-hint { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
 /* session notepad */
 .notepad-wrap { margin-top: 20px; }
 .notepad {
@@ -213,6 +232,83 @@ body {
 .mode-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.5s; }
 .mode-bar-fill.green { background: #38bdf8; }
 .mode-bar-count { color: var(--text); min-width: 20px; text-align: right; }
+
+/* ── PLANNER ── */
+.planner-section { margin-bottom: 28px; }
+.planner-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.planner-title { font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+.planner-meta { font-size: 11px; color: var(--muted); }
+.planner-progress {
+  height: 3px; background: var(--faint); border-radius: 2px; margin-bottom: 14px; overflow: hidden;
+}
+.planner-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+
+.weekly-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 6px; transition: opacity 0.2s;
+}
+.weekly-item.done-item { opacity: 0.5; }
+.weekly-check {
+  width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--border2);
+  background: transparent; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; transition: all 0.15s; color: transparent; font-size: 11px;
+}
+.weekly-check.done { background: var(--accent); border-color: var(--accent); color: #000; }
+.weekly-item-text { flex: 1; font-size: 13px; color: var(--text); }
+.weekly-item-text.done { text-decoration: line-through; color: var(--muted); }
+.weekly-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 0 2px; opacity: 0; transition: opacity 0.15s; }
+.weekly-item:hover .weekly-item-del { opacity: 1; }
+
+.add-weekly-row {
+  display: flex; gap: 8px; margin-top: 10px;
+}
+.add-weekly-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--text);
+  outline: none; font-family: inherit; transition: border-color 0.15s;
+}
+.add-weekly-input::placeholder { color: var(--muted); }
+.add-weekly-input:focus { border-color: var(--accent-dim); }
+.add-weekly-btn {
+  padding: 9px 16px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer;
+  font-family: inherit; transition: all 0.15s; white-space: nowrap;
+}
+.add-weekly-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+
+.gcal-connect {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  margin-bottom: 20px;
+}
+.gcal-icon { font-size: 18px; flex-shrink: 0; }
+.gcal-info { flex: 1; }
+.gcal-info .gcal-title { font-size: 13px; color: var(--text); font-weight: 500; }
+.gcal-info .gcal-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.gcal-btn {
+  padding: 7px 14px; font-size: 12px; font-weight: 500; border-radius: 6px;
+  border: 1px solid var(--border2); background: transparent; color: var(--text);
+  cursor: pointer; font-family: inherit; white-space: nowrap; transition: all 0.15s;
+}
+.gcal-btn:hover { border-color: var(--accent-dim); color: var(--accent); }
+.gcal-btn.connected { border-color: var(--accent); color: var(--accent); cursor: default; }
+
+.today-task-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 14px; border-bottom: 1px solid var(--faint); font-size: 13px;
+}
+.today-task-bullet { color: var(--accent); margin-top: 1px; flex-shrink: 0; font-size: 11px; }
+.today-task-bullet.pending { color: var(--muted); }
+.today-task-label { flex: 1; color: var(--text); }
+.today-task-label.pending { color: var(--muted); text-decoration: line-through; }
+.today-task-session { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.today-empty { font-size: 13px; color: var(--muted); padding: 20px 14px; }
+
+.week-reset-note { font-size: 11px; color: var(--muted); margin-top: 12px; text-align: center; }
 </style>
 </head>
 <body>
@@ -224,10 +320,18 @@ body {
   </div>
   <div class="nav-tabs">
     <button class="nav-tab active" data-view="timer">Timer</button>
+    <button class="nav-tab" data-view="planner">Planner</button>
     <button class="nav-tab" data-view="log">Sessions</button>
     <button class="nav-tab" data-view="stats">Stats</button>
   </div>
 </nav>
+
+<!-- ── QUOTE CARD (always visible) ── -->
+<div class="quote-card" id="quoteCard" title="Click for a new quote" style="max-width:700px;width:calc(100% - 48px);margin:12px 0 0;">
+  <div class="q-text" id="qText"></div>
+  <div class="q-author" id="qAuthor"></div>
+  <div class="q-hint">tap for a new quote</div>
+</div>
 
 <!-- ── TIMER VIEW ── -->
 <div class="view active" id="view-timer">
@@ -302,6 +406,47 @@ body {
   <div class="log-list" id="logList"></div>
 </div>
 
+<!-- ── PLANNER VIEW ── -->
+<div class="view" id="view-planner">
+
+  <!-- Google Calendar connect -->
+  <div class="gcal-connect" id="gcalBanner">
+    <span class="gcal-icon">📅</span>
+    <div class="gcal-info">
+      <div class="gcal-title">Google Calendar</div>
+      <div class="gcal-sub" id="gcalSubText">Connect to pull this week's events into your checklist</div>
+    </div>
+    <button class="gcal-btn" id="gcalBtn">Connect</button>
+  </div>
+
+  <!-- Weekly non-negotiables -->
+  <div class="planner-section">
+    <div class="planner-header">
+      <span class="planner-title">This week's non-negotiables</span>
+      <span class="planner-meta" id="weekRangeLabel"></span>
+    </div>
+    <div class="planner-progress"><div class="planner-progress-fill" id="weeklyProgressFill" style="width:0%"></div></div>
+    <div id="weeklyList"></div>
+    <div class="add-weekly-row">
+      <input class="add-weekly-input" id="addWeeklyInput" placeholder="Add a must-do this week…" maxlength="100">
+      <button class="add-weekly-btn" id="addWeeklyBtn">+ Add</button>
+    </div>
+    <div class="week-reset-note" id="weekResetNote"></div>
+  </div>
+
+  <!-- Today's completed tasks -->
+  <div class="planner-section">
+    <div class="planner-header">
+      <span class="planner-title">Today's completed tasks</span>
+      <span class="planner-meta" id="todayDateLabel"></span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <div id="todayTaskList"></div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ── STATS VIEW ── -->
 <div class="view" id="view-stats">
   <div class="stats-grid">
@@ -354,11 +499,44 @@ const modeConfig = {
   recharge: { label: 'recharge',        defaultMin: 10, color: '#38bdf8' },
 };
 
+const legendQuotes = [
+  { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
+  { text: "Stop being afraid of what could go wrong and start being excited about what could go right.", author: "Tony Robbins" },
+  { text: "It is in your moments of decision that your destiny is shaped.", author: "Tony Robbins" },
+  { text: "Success is doing what you want, when you want, where you want, with whom you want, as much as you want.", author: "Tony Robbins" },
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "Do not wait to strike till the iron is hot, but make it hot by striking.", author: "W.B. Yeats" },
+  { text: "You don't find your worth in a win. You carry your worth into the win.", author: "Jay Shetty" },
+  { text: "The sign of a beautiful person is that they always see beauty in others.", author: "Jay Shetty" },
+  { text: "If you don't build your dream, someone else will hire you to help build theirs.", author: "Tony Gaskins" },
+  { text: "Work like there is someone working 24 hours a day to take it all away from you.", author: "Mark Cuban" },
+  { text: "Ideas are easy. Execution is everything.", author: "John Doerr" },
+  { text: "Chase the vision, not the money. The money will end up following you.", author: "Tony Hsieh" },
+  { text: "Your time is limited. Don't waste it living someone else's life.", author: "Steve Jobs" },
+  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+  { text: "Hard work beats talent when talent does not work hard.", author: "Tim Notke" },
+  { text: "You miss 100% of the shots you don't take.", author: "Wayne Gretzky" },
+  { text: "The successful warrior is the average man with laser-like focus.", author: "Bruce Lee" },
+  { text: "An entrepreneur is someone who jumps off a cliff and builds a plane on the way down.", author: "Reid Hoffman" },
+  { text: "Move fast. The world rewards action, not intention.", author: "Neeraj Vaid" },
+  { text: "Build something people need, not something people notice.", author: "Neeraj Vaid" },
+  { text: "Every deal you didn't close was practice for the one you will.", author: "Neeraj Vaid" },
+  { text: "Done is better than perfect. Ship it, then sharpen it.", author: "Neeraj Vaid" },
+  { text: "Your network is your net worth — but only if you actually show up.", author: "Neeraj Vaid" },
+  { text: "Discipline is choosing between what you want now and what you want most.", author: "Abraham Lincoln" },
+  { text: "A year from now you will wish you had started today.", author: "Karen Lamb" },
+  { text: "Don't count the days. Make the days count.", author: "Muhammad Ali" },
+  { text: "The distance between your dreams and reality is called action.", author: "Unknown" },
+  { text: "Vision without execution is hallucination.", author: "Thomas Edison" },
+  { text: "You were not born to play small.", author: "Marianne Williamson" },
+  { text: "Opportunities don't happen. You create them.", author: "Chris Grosser" },
+];
+
 const quotes = {
-  deep:     ['Block out the noise.', 'This hour pays for itself.', 'No calls. Just output.'],
-  calls:    ['Listen twice. Close once.', 'Every call is a deal in progress.', 'Ask the question they fear.'],
-  content:  ['One piece, fully finished.', 'Your audience is waiting.', 'Publish, then optimize.'],
-  recharge: ['Recovery is part of the system.', 'Sharp mind, better decisions.', 'Rest is productive too.'],
+  deep:     ['Block out the noise. This hour pays for itself.', 'No calls. No DMs. Just output.', 'The work you do in silence speaks loudest.'],
+  calls:    ['Listen twice. Close once.', 'Every call is a deal in progress.', 'Ask the question they fear to answer.'],
+  content:  ['One piece, fully finished.', 'Your audience is waiting. Publish.', 'Create once. Distribute everywhere.'],
+  recharge: ['Recovery is part of the system.', 'A sharp mind makes better decisions.', 'Rest is not laziness. It is fuel.'],
 };
 
 // ── State ──
@@ -431,7 +609,7 @@ function setMode(mode) {
   mainVal.textContent = cfg.defaultMin + 'm';
   progress.style.stroke = cfg.color;
   quoteEl.textContent = '"' + quotes[mode][Math.floor(Math.random() * quotes[mode].length)] + '"';
-  stopTimer(); resetTimer();
+  stopTimer(); resetTimer(); setLegendQuote();
 }
 
 function resetTimer() {
@@ -691,6 +869,184 @@ function buildStats() {
     </div>`).join('');
 }
 
+// ── PLANNER ──
+const GCAL_CLIENT_ID = '722366162239-r6la60ollfabh6pv4u94pjpacg4igd7l.apps.googleusercontent.com';
+
+function weekKey() {
+  const d = new Date();
+  const day = d.getDay(); // 0=Sun
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return monday.toISOString().slice(0, 10);
+}
+
+function weekRangeLabel() {
+  const d = new Date();
+  const day = d.getDay();
+  const mon = new Date(d); mon.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = dt => dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return fmt(mon) + ' – ' + fmt(sun);
+}
+
+function daysUntilMonday() {
+  const d = new Date().getDay();
+  return d === 0 ? 1 : 8 - d;
+}
+
+function loadWeekly() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('nv_weekly') || '{}');
+    if (raw.weekKey !== weekKey()) return { weekKey: weekKey(), items: [] };
+    return raw;
+  } catch(e) { return { weekKey: weekKey(), items: [] }; }
+}
+
+function saveWeekly(data) { localStorage.setItem('nv_weekly', JSON.stringify(data)); }
+
+function renderWeekly() {
+  const data = loadWeekly();
+  const list = document.getElementById('weeklyList');
+  const fill = document.getElementById('weeklyProgressFill');
+  const resetNote = document.getElementById('weekResetNote');
+  document.getElementById('weekRangeLabel').textContent = weekRangeLabel();
+  document.getElementById('todayDateLabel').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  const total = data.items.length;
+  const done = data.items.filter(i => i.done).length;
+  fill.style.width = total ? Math.round(done / total * 100) + '%' : '0%';
+  resetNote.textContent = total ? `${done}/${total} done · resets in ${daysUntilMonday()} day${daysUntilMonday() !== 1 ? 's' : ''}` : 'Add your must-dos for this week';
+
+  if (!total) {
+    list.innerHTML = '<div class="today-empty">No items yet. Add your weekly non-negotiables below.</div>';
+    return;
+  }
+
+  list.innerHTML = data.items.map((item, i) => `
+    <div class="weekly-item ${item.done ? 'done-item' : ''}">
+      <button class="weekly-check ${item.done ? 'done' : ''}" data-wi="${i}">${item.done ? '✓' : ''}</button>
+      <span class="weekly-item-text ${item.done ? 'done' : ''}">${escHtml(item.text)}</span>
+      ${item.fromCal ? '<span style="font-size:10px;color:var(--muted);">📅</span>' : ''}
+      <button class="weekly-item-del" data-wd="${i}">×</button>
+    </div>`).join('');
+
+  list.querySelectorAll('.weekly-check').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = loadWeekly();
+      d.items[parseInt(btn.dataset.wi)].done ^= 1;
+      saveWeekly(d); renderWeekly();
+    });
+  });
+  list.querySelectorAll('.weekly-item-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = loadWeekly();
+      d.items.splice(parseInt(btn.dataset.wd), 1);
+      saveWeekly(d); renderWeekly();
+    });
+  });
+}
+
+function addWeeklyItem(text) {
+  if (!text.trim()) return;
+  const data = loadWeekly();
+  data.items.push({ text: text.trim(), done: false, fromCal: false });
+  saveWeekly(data); renderWeekly();
+}
+
+document.getElementById('addWeeklyBtn').addEventListener('click', () => {
+  const inp = document.getElementById('addWeeklyInput');
+  addWeeklyItem(inp.value); inp.value = '';
+});
+document.getElementById('addWeeklyInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    addWeeklyItem(e.target.value); e.target.value = '';
+  }
+});
+
+// ── TODAY'S TASKS ──
+function renderTodayTasks() {
+  const sessions = loadSessions();
+  const todayKey = todayStr();
+  const toKey = d => new Date(d).toISOString().slice(0, 10);
+  const todaySessions = sessions.filter(s => toKey(s.date) === todayKey);
+
+  const listEl = document.getElementById('todayTaskList');
+  const allTasks = [];
+  todaySessions.forEach(s => {
+    (s.tasks || []).forEach(t => {
+      allTasks.push({ text: t.text, done: t.done, session: s.title, time: fmtTime(s.date) });
+    });
+  });
+
+  if (!allTasks.length) {
+    listEl.innerHTML = '<div class="today-empty">No tasks logged today. Start a sprint and add tasks to your session.</div>';
+    return;
+  }
+
+  // done first, then pending
+  const sorted = [...allTasks.filter(t => t.done), ...allTasks.filter(t => !t.done)];
+  listEl.innerHTML = sorted.map(t => `
+    <div class="today-task-item">
+      <span class="today-task-bullet ${t.done ? '' : 'pending'}">${t.done ? '✓' : '○'}</span>
+      <span class="today-task-label ${t.done ? '' : 'pending'}">${escHtml(t.text)}</span>
+      <span class="today-task-session">${escHtml(t.session)} · ${t.time}</span>
+    </div>`).join('');
+}
+
+// ── GOOGLE CALENDAR ──
+let gcalConnected = false;
+
+function initGcal() {
+  if (!GCAL_CLIENT_ID) return; // not configured yet
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.onload = () => { document.getElementById('gcalBtn').textContent = 'Sign in'; };
+  document.head.appendChild(script);
+}
+
+function gcalSignIn() {
+  if (!GCAL_CLIENT_ID) {
+    document.getElementById('gcalSubText').textContent = 'Paste your Google OAuth Client ID into the app to enable this.';
+    return;
+  }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: GCAL_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/calendar.readonly',
+    callback: (resp) => { if (resp.access_token) fetchCalEvents(resp.access_token); },
+  });
+  client.requestAccessToken();
+}
+
+async function fetchCalEvents(token) {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now); monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1)); monday.setHours(0,0,0,0);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6); sunday.setHours(23,59,59,999);
+
+  const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${monday.toISOString()}&timeMax=${sunday.toISOString()}&singleEvents=true&orderBy=startTime&maxResults=50`;
+  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  const data = await res.json();
+
+  const events = (data.items || []).filter(e => e.summary);
+  const weekData = loadWeekly();
+  const existingTexts = weekData.items.map(i => i.text.toLowerCase());
+
+  events.forEach(e => {
+    if (!existingTexts.includes(e.summary.toLowerCase())) {
+      weekData.items.push({ text: e.summary, done: false, fromCal: true });
+    }
+  });
+  saveWeekly(weekData);
+
+  gcalConnected = true;
+  document.getElementById('gcalBtn').textContent = 'Connected ✓';
+  document.getElementById('gcalBtn').className = 'gcal-btn connected';
+  document.getElementById('gcalSubText').textContent = `${events.length} events imported this week`;
+  renderWeekly();
+}
+
+document.getElementById('gcalBtn').addEventListener('click', gcalSignIn);
+
 // ── NAV ──
 document.querySelectorAll('.nav-tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -700,11 +1056,32 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
     document.getElementById('view-'+tab.dataset.view).classList.add('active');
     if (tab.dataset.view === 'log') renderLog();
     if (tab.dataset.view === 'stats') buildStats();
+    if (tab.dataset.view === 'planner') { renderWeekly(); renderTodayTasks(); }
   });
 });
 
 // ── Init ──
+let lastQuoteIdx = -1;
+function setLegendQuote() {
+  let idx;
+  do { idx = Math.floor(Math.random() * legendQuotes.length); } while (idx === lastQuoteIdx);
+  lastQuoteIdx = idx;
+  const q = legendQuotes[idx];
+  const textEl = document.getElementById('qText');
+  const authorEl = document.getElementById('qAuthor');
+  textEl.style.transition = 'opacity 0.3s';
+  textEl.style.opacity = '0';
+  setTimeout(() => {
+    textEl.textContent = '“' + q.text + '”';
+    authorEl.textContent = '— ' + q.author;
+    textEl.style.opacity = '1';
+  }, 220);
+}
+
+document.getElementById('quoteCard').addEventListener('click', setLegendQuote);
+
 setMode('deep');
+setLegendQuote();
 updateStreak();
 renderChecklist();
 </script>
